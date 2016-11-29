@@ -1,0 +1,6 @@
+[package]
+name = "dup-сhecker"
+version = "0.1.0"
+authors = ["Safort <the-safort@yandex.ru>"]
+
+[dependencies]
