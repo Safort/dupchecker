@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::fs::{File, read_dir};
 use std::io::Result;
 use std::env;
+use std::path::PathBuf;
 
 
 fn get_file_content(path: String) -> Result<String> {
@@ -22,7 +23,7 @@ fn get_file_hash(text: String) -> u64 {
     hasher.finish()
 }
 
-fn get_file_paths(dir: String) -> Result<Vec<std::path::PathBuf>> {
+fn get_file_paths(dir: String) -> Result<Vec<PathBuf>> {
     let dir_list = read_dir(dir)?;
     let mut files_paths = vec![];
 
@@ -50,10 +51,7 @@ fn print_duplicats(duplicates: Vec<String>) {
     }
 }
 
-
-fn main() {
-    let dir_path = env::args().nth(1).unwrap().to_string();
-    let files = get_file_paths(dir_path).unwrap();
+fn find_duplicates(files: Vec<PathBuf>) -> Vec<String> {
     let mut store = HashMap::new();
     let mut duplicates: Vec<String> = vec![];
 
@@ -68,6 +66,15 @@ fn main() {
             duplicates.push(file_path.to_string());
         }
     }
+
+    duplicates
+}
+
+
+fn main() {
+    let dir_path = env::args().nth(1).unwrap().to_string();
+    let files = get_file_paths(dir_path).unwrap();
+    let duplicates = find_duplicates(files);
 
     print_duplicats(duplicates);
 }
