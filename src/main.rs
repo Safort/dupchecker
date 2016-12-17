@@ -1,6 +1,6 @@
 use std::io::prelude::*;
 use std::hash::{Hash, Hasher};
-use std::collections::hash_map::{DefaultHasher};
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs::{File, read_dir};
 use std::io::Result;
