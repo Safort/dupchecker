@@ -1,6 +1,9 @@
 [package]
-name = "dup-сhecker"
+name = "dupchecker"
 version = "0.1.0"
-authors = ["Safort <the-safort@yandex.ru>"]
+authors = ["Safort <a.asafort@gmail.com>"]
+license = "MIT"
+
 
 [dependencies]
+
