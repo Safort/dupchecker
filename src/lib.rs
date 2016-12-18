@@ -14,7 +14,7 @@ fn get_file_content(path: String) -> Result<String> {
     Ok(s)
 }
 
-fn get_file_hash(text: String) -> u64 {
+pub fn get_hash(text: String) -> u64 {
     let mut hasher = DefaultHasher::new();
 
     text.into_bytes().hash(&mut hasher);
@@ -57,7 +57,7 @@ pub fn find_duplicates(files: Vec<PathBuf>) -> Vec<String> {
     for file in &files {
         let file_path = file.to_str().unwrap();
         let file_content = get_file_content(file_path.to_string()).unwrap();
-        let hash = get_file_hash(file_content);
+        let hash = get_hash(file_content);
 
         if !store.contains_key(&hash) {
             store.insert(hash, file_path);
