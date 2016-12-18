@@ -2,6 +2,7 @@
 name = "dupchecker"
 version = "0.1.0"
 authors = ["Safort <a.asafort@gmail.com>"]
+description = "Library, which helps to check files for duplicates"
 license = "MIT"
 
 
