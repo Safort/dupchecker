@@ -68,3 +68,49 @@ pub fn find_duplicates(files: Vec<PathBuf>) -> Vec<String> {
 
     duplicates
 }
+
+
+#[cfg(test)]
+mod tests {
+    use std::io::prelude::*;
+    use std::fs::{
+        File,
+        create_dir,
+        remove_dir_all
+    };
+    use super::{
+        get_file_content,
+        get_hash
+    };
+
+
+    fn create_file(name: &'static str, text: &'static [u8; 9])  {
+        let mut f = File::create(name.to_string()).unwrap();
+        f.write_all(text).unwrap();
+    }
+
+    #[test]
+    fn test_get_file_content() {
+        create_dir("test-dir").unwrap();
+        create_file("test-dir/test.txt", b"some text");
+
+        let content = get_file_content("test-dir/test.txt".to_string()).unwrap();
+
+        assert_eq!(content, "some text");
+        remove_dir_all("test-dir").unwrap();
+    }
+
+    #[test]
+    fn test_get_hash() {
+        create_dir("test-dir").unwrap();
+        create_file("test-dir/test.txt", b"some text");
+
+        let content = get_file_content("test-dir/test.txt".to_string()).unwrap();
+        let hash = get_hash(content.to_string());
+
+        assert_eq!(hash, 17575663810583844296);
+        remove_dir_all("test-dir").unwrap();
+    }
+
+
+}
