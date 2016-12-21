@@ -1,6 +1,6 @@
 [package]
 name = "dupchecker"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Safort <a.asafort@gmail.com>"]
 repository = "https://github.com/Safort/dupchecker"
 description = "Library, which helps to check files for duplicates"
