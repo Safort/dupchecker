@@ -7,17 +7,17 @@ use std::io::Result;
 use std::path::PathBuf;
 
 
-fn get_file_content(path: String) -> Result<String> {
-    let mut f = File::open(path)?;
-    let mut s = String::new();
-    f.read_to_string(&mut s)?;
-    Ok(s)
+fn get_file_data(path: String) -> Result<Vec<u8>> {
+    let mut file = File::open(path)?;
+    let mut data = Vec::new();
+    file.read_to_end(&mut data)?;
+    Ok(data)
 }
 
-pub fn get_hash(text: String) -> u64 {
+pub fn get_hash(file_data: Vec<u8>) -> u64 {
     let mut hasher = DefaultHasher::new();
 
-    text.into_bytes().hash(&mut hasher);
+    file_data.hash(&mut hasher);
 
     hasher.finish()
 }
@@ -56,7 +56,7 @@ pub fn find_duplicates(files: Vec<PathBuf>) -> Vec<String> {
 
     for file in &files {
         let file_path = file.to_str().unwrap();
-        let file_content = get_file_content(file_path.to_string()).unwrap();
+        let file_content = get_file_data(file_path.to_string()).unwrap();
         let hash = get_hash(file_content);
 
         if !store.contains_key(&hash) {
@@ -79,7 +79,7 @@ mod tests {
         remove_dir_all
     };
     use super::{
-        get_file_content,
+        get_file_data,
         get_hash
     };
 
@@ -90,27 +90,25 @@ mod tests {
     }
 
     #[test]
-    fn test_get_file_content() {
+    fn test_get_file_data() {
         create_dir("test-dir").unwrap();
         create_file("test-dir/test.txt", b"some text");
 
-        let content = get_file_content("test-dir/test.txt".to_string()).unwrap();
+        let content = get_file_data("test-dir/test.txt".to_string()).unwrap();
 
-        assert_eq!(content, "some text");
+        assert_eq!(content, "some text".to_string().into_bytes());
         remove_dir_all("test-dir").unwrap();
     }
 
     #[test]
     fn test_get_hash() {
-        create_dir("test-dir").unwrap();
-        create_file("test-dir/test.txt", b"some text");
+        create_dir("test-dir2").unwrap();
+        create_file("test-dir2/test2.txt", b"some text");
 
-        let content = get_file_content("test-dir/test.txt".to_string()).unwrap();
-        let hash = get_hash(content.to_string());
+        let content = get_file_data("test-dir2/test2.txt".to_string()).unwrap();
+        let hash = get_hash(content);
 
         assert_eq!(hash, 17575663810583844296);
-        remove_dir_all("test-dir").unwrap();
+        remove_dir_all("test-dir2").unwrap();
     }
-
-
 }
