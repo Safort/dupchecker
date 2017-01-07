@@ -31,6 +31,11 @@ pub fn get_file_paths(dir: String) -> Result<Vec<PathBuf>> {
 
         if *&i.is_file() {
             files_paths.push(i);
+        } else if *&i.is_dir() {
+            //wow! So ugly, such bad, much shit_code
+            let mut dirs_paths = get_file_paths(i.to_str().unwrap().to_string()).unwrap();
+            
+            files_paths.append(&mut dirs_paths);
         }
     }
 
