@@ -4,6 +4,7 @@ use std::fs::{read_dir, File};
 use std::hash::{Hash, Hasher};
 use std::io::prelude::*;
 use std::io::Result;
+use std::path::PathBuf;
 
 fn get_file_data(path: String) -> Result<Vec<u8>> {
     let mut file = File::open(path)?;
@@ -20,19 +21,19 @@ pub fn get_hash(file_data: Vec<u8>) -> u64 {
     hasher.finish()
 }
 
-pub fn get_file_paths(dir: String) -> Result<Vec<String>> {
-    let dir_list = read_dir(dir)?;
+pub fn get_file_paths(dir: PathBuf) -> Result<Vec<String>> {
+    let dir_content = read_dir(dir)?;
     let mut file_paths = vec![];
 
-    for dir in dir_list {
+    for dir in dir_content {
         let dir = dir?.path();
-        let dir_str = dir.to_str().unwrap().to_string();
+        // let dir_str = dir.to_str().unwrap().to_string();
 
         if *&dir.is_file() {
-            file_paths.push(dir_str);
+            file_paths.push(dir.to_str().unwrap().to_string());
         } else if *&dir.is_dir() {
             // wow! So ugly, such bad, much shit_code
-            let mut dirs_paths = get_file_paths(dir_str).unwrap();
+            let mut dirs_paths = get_file_paths(dir).unwrap();
 
             file_paths.append(&mut dirs_paths);
         }
@@ -43,7 +44,7 @@ pub fn get_file_paths(dir: String) -> Result<Vec<String>> {
 
 pub fn print_duplicats(duplicates: Vec<String>) {
     if duplicates.len() == 0 {
-        println!("Duplicates not founded");
+        println!("No duplicates found");
         return ();
     }
 
@@ -78,7 +79,7 @@ mod tests {
     use std;
     use std::fs::{create_dir, remove_dir_all, File};
     use std::io::prelude::*;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     fn create_file(name: &'static str, text: &str) {
         let mut f = File::create(name.to_string()).unwrap();
@@ -128,7 +129,7 @@ mod tests {
         create_file("test-dir-paths/test2.txt", "text");
         create_file("test-dir-paths/test3.txt", "text");
 
-        let file_list = get_file_paths("test-dir-paths".to_string()).unwrap();
+        let file_list = get_file_paths(PathBuf::from("test-dir-paths")).unwrap();
 
         assert_eq!(3, file_list.len());
         assert_eq!(
@@ -155,7 +156,7 @@ mod tests {
         create_file("test-find-duplicates/test3.txt", "text");
         create_file("test-find-duplicates/test4.txt", "another text");
 
-        let file_list = get_file_paths("test-find-duplicates".to_string()).unwrap();
+        let file_list = get_file_paths(PathBuf::from("test-find-duplicates")).unwrap();
         let duplicates = find_duplicates(file_list);
 
         assert_eq!(1, duplicates.len());
