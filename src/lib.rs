@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::io::Result;
 use std::path::PathBuf;
 
-fn get_file_data(path: String) -> Result<Vec<u8>> {
+fn get_file_data(path: &String) -> Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
@@ -17,7 +17,6 @@ pub fn get_hash(file_data: Vec<u8>) -> u64 {
     let mut hasher = DefaultHasher::new();
 
     file_data.hash(&mut hasher);
-
     hasher.finish()
 }
 
@@ -27,13 +26,12 @@ pub fn get_file_paths(dir: PathBuf) -> Result<Vec<String>> {
 
     for dir in dir_content {
         let dir = dir?.path();
-        // let dir_str = dir.to_str().unwrap().to_string();
 
         if *&dir.is_file() {
             file_paths.push(dir.to_str().unwrap().to_string());
         } else if *&dir.is_dir() {
             // wow! So ugly, such bad, much shit_code
-            let mut dirs_paths = get_file_paths(dir).unwrap();
+            let mut dirs_paths = get_file_paths(dir)?;
 
             file_paths.append(&mut dirs_paths);
         }
@@ -55,18 +53,18 @@ pub fn print_duplicats(duplicates: Vec<String>) {
     }
 }
 
-pub fn find_duplicates(file_paths: Vec<String>) -> Vec<String> {
+pub fn find_duplicates(file_paths: &Vec<String>) -> Vec<String> {
     let mut store = HashMap::new();
     let mut duplicates: Vec<String> = vec![];
 
-    for file_path in &file_paths {
-        let file_content = get_file_data(file_path.to_string()).unwrap();
+    for file_path in file_paths {
+        let file_content = get_file_data(&file_path).unwrap();
         let hash = get_hash(file_content);
 
-        if !store.contains_key(&hash) {
-            store.insert(hash, file_path);
-        } else {
+        if store.contains_key(&hash) {
             duplicates.push(file_path.to_string());
+        } else {
+            store.insert(hash, file_path);
         }
     }
 
@@ -104,7 +102,7 @@ mod tests {
         create_new_dir("test-dir").unwrap();
         create_file("test-dir/test.txt", "text");
 
-        let content = get_file_data("test-dir/test.txt".to_string()).unwrap();
+        let content = get_file_data(&"test-dir/test.txt".to_string()).unwrap();
 
         assert_eq!(content, "text".to_string().into_bytes());
         remove_dir("test-dir").unwrap();
@@ -115,7 +113,7 @@ mod tests {
         create_new_dir("test-dir-get-hash").unwrap();
         create_file("test-dir-get-hash/test.txt", "text");
 
-        let content = get_file_data("test-dir-get-hash/test.txt".to_string()).unwrap();
+        let content = get_file_data(&"test-dir-get-hash/test.txt".to_string()).unwrap();
         let hash = get_hash(content);
 
         assert_eq!(hash, 6797947405645866459);
@@ -157,7 +155,10 @@ mod tests {
         create_file("test-find-duplicates/test4.txt", "another text");
 
         let file_list = get_file_paths(PathBuf::from("test-find-duplicates")).unwrap();
-        let duplicates = find_duplicates(file_list);
+        let duplicates = find_duplicates(&file_list);
+
+        println!("duplicates = {:?}\n", duplicates);
+        println!("file_list = {:?}", file_list);
 
         assert_eq!(1, duplicates.len());
         assert_eq!(

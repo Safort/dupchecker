@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let files = get_file_paths(dir_path)?;
-    let duplicates = find_duplicates(files);
+    let duplicates = find_duplicates(&files);
 
     print_duplicats(duplicates);
 
