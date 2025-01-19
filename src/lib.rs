@@ -6,6 +6,8 @@ use std::io::prelude::*;
 use std::io::Result;
 use std::path::PathBuf;
 
+use colored::Colorize;
+
 fn get_file_data(path: &String) -> Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
@@ -40,7 +42,7 @@ pub fn get_file_paths(dir: PathBuf) -> Result<Vec<String>> {
     Ok(file_paths)
 }
 
-pub fn print_duplicats(duplicates: Vec<String>) {
+pub fn print_duplicats(duplicates: HashMap<String, Vec<String>>) {
     if duplicates.len() == 0 {
         println!("No duplicates found");
         return ();
@@ -48,23 +50,36 @@ pub fn print_duplicats(duplicates: Vec<String>) {
 
     println!("Duplicates ({}): ", duplicates.len());
 
-    for path in duplicates {
-        println!("{}", path);
+    for (main_path, paths) in duplicates {
+        println!("➜ {}", main_path.bold());
+
+        for path in paths {
+            println!("    {}", path);
+        }
     }
 }
 
-pub fn find_duplicates(file_paths: &Vec<String>) -> Vec<String> {
-    let mut store = HashMap::new();
-    let mut duplicates: Vec<String> = vec![];
+pub fn find_duplicates(file_paths: &Vec<String>) -> HashMap<String, Vec<String>> {
+    let mut hash_path_store: HashMap<u64, &String> = HashMap::new();
+    let mut duplicates: HashMap<String, Vec<String>> = HashMap::new();
 
     for file_path in file_paths {
-        let file_content = get_file_data(&file_path).unwrap();
-        let hash = get_hash(file_content);
+        let hash = get_hash(get_file_data(&file_path).unwrap());
+        let store_path = hash_path_store.get(&hash);
 
-        if store.contains_key(&hash) {
-            duplicates.push(file_path.to_string());
+        if let Some(store_file_path) = store_path {
+            let mut duplicate_paths = duplicates.get(&store_file_path.to_string());
+            let mut new_paths = vec![];
+
+            if let Some(paths) = duplicate_paths.as_mut() {
+                new_paths.extend(paths.clone());
+                new_paths.push(file_path.to_string());
+            } else {
+                new_paths.push(file_path.clone());
+            }
+            duplicates.insert(store_file_path.to_string(), new_paths);
         } else {
-            store.insert(hash, file_path);
+            hash_path_store.insert(hash, file_path);
         }
     }
 
@@ -152,18 +167,23 @@ mod tests {
         create_file("test-find-duplicates/test1.txt", "text");
         create_file("test-find-duplicates/test2.txt", "some text");
         create_file("test-find-duplicates/test3.txt", "text");
+        create_file("test-find-duplicates/test3.1.txt", "text");
         create_file("test-find-duplicates/test4.txt", "another text");
 
         let file_list = get_file_paths(PathBuf::from("test-find-duplicates")).unwrap();
         let duplicates = find_duplicates(&file_list);
 
-        println!("duplicates = {:?}\n", duplicates);
-        println!("file_list = {:?}", file_list);
-
         assert_eq!(1, duplicates.len());
         assert_eq!(
             true,
-            duplicates.contains(&"test-find-duplicates/test3.txt".to_string())
+            duplicates.contains_key("test-find-duplicates/test1.txt")
+        );
+        assert_eq!(
+            Some(&vec![
+                "test-find-duplicates/test3.txt".to_string(),
+                "test-find-duplicates/test3.1.txt".to_string()
+            ]),
+            duplicates.get("test-find-duplicates/test1.txt")
         );
 
         remove_dir("test-find-duplicates").unwrap();

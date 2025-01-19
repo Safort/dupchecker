@@ -1,6 +1,6 @@
 [package]
 name = "dupchecker"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 authors = ["Safort <a.asafort@gmail.com>"]
 repository = "https://github.com/Safort/dupchecker"
@@ -9,3 +9,4 @@ license = "MIT"
 
 
 [dependencies]
+colored = "3.0.0"
