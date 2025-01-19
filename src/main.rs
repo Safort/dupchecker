@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = env::args();
-    let dir_path = if args.len() == 0 {
+    let dir_path = if args.len() <= 1 {
         current_dir()?
     } else {
         PathBuf::from(args.nth(1).unwrap())
