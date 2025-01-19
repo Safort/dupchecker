@@ -1,10 +1,9 @@
-use std::io::prelude::*;
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::fs::{File, read_dir};
+use std::fs::{read_dir, File};
+use std::hash::{Hash, Hasher};
+use std::io::prelude::*;
 use std::io::Result;
-
 
 fn get_file_data(path: String) -> Result<Vec<u8>> {
     let mut file = File::open(path)?;
@@ -73,15 +72,13 @@ pub fn find_duplicates(file_paths: Vec<String>) -> Vec<String> {
     duplicates
 }
 
-
 #[cfg(test)]
 mod tests {
+    use super::{find_duplicates, get_file_data, get_file_paths, get_hash};
     use std;
+    use std::fs::{create_dir, remove_dir_all, File};
     use std::io::prelude::*;
-    use std::fs::{File, create_dir, remove_dir_all};
     use std::path::Path;
-    use super::{get_file_data, get_hash, get_file_paths, find_duplicates};
-
 
     fn create_file(name: &'static str, text: &str) {
         let mut f = File::create(name.to_string()).unwrap();
@@ -134,9 +131,18 @@ mod tests {
         let file_list = get_file_paths("test-dir-paths".to_string()).unwrap();
 
         assert_eq!(3, file_list.len());
-        assert_eq!(true, file_list.contains(&"test-dir-paths/test1.txt".to_string()));
-        assert_eq!(true, file_list.contains(&"test-dir-paths/test2.txt".to_string()));
-        assert_eq!(true, file_list.contains(&"test-dir-paths/test3.txt".to_string()));
+        assert_eq!(
+            true,
+            file_list.contains(&"test-dir-paths/test1.txt".to_string())
+        );
+        assert_eq!(
+            true,
+            file_list.contains(&"test-dir-paths/test2.txt".to_string())
+        );
+        assert_eq!(
+            true,
+            file_list.contains(&"test-dir-paths/test3.txt".to_string())
+        );
 
         remove_dir("test-dir-paths").unwrap();
     }
@@ -153,7 +159,10 @@ mod tests {
         let duplicates = find_duplicates(file_list);
 
         assert_eq!(1, duplicates.len());
-        assert_eq!(true, duplicates.contains(&"test-find-duplicates/test1.txt".to_string()));
+        assert_eq!(
+            true,
+            duplicates.contains(&"test-find-duplicates/test3.txt".to_string())
+        );
 
         remove_dir("test-find-duplicates").unwrap();
     }
